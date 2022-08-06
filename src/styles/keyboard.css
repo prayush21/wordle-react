@@ -38,7 +38,7 @@
     width: 1.75em;
 }
 
-.key:hover, .key:focus{
+.key:hover{
     --lightness-offset: 10%;
 }
 
