@@ -1,9 +1,51 @@
+import { useEffect, useRef } from 'react';
 import './../styles/keyboard.css'
+import Key from './Key';
+
 
 const Keyboard = () => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const keysArray = "Q W E R T Y U I O P A S D F G H J K L Enter Z X C V B N M Delete".split(" ");
+  const keysObjArray = keysArray.map(value => {
+    return {
+      keyValue: value,
+      state: "",
+    }
+  })
+  
+  // useEffect(() => {
+  //   const handleClick = (e:MouseEvent) => {
+  //     console.log("clicked", e.target); 
+  //   }
+  //   const {current: element} = ref;
+
+  //   element?.addEventListener('click', handleClick);
+
+  //   return () => {
+  //     element?.removeEventListener('click', handleClick);
+  //   };
+  // },[])
+
+
   return (
     <>
-      <div className="keyboard">
+      <div ref={ref} className="keyboard">
+        {keysObjArray.map(({keyValue, state}) => {
+          if(keyValue == 'A'){
+            return <><div className="space"></div><Key keyValue={keyValue} state={state}/></>
+          }
+        return <Key keyValue={keyValue} state={state}/>
+        })}
+      </div>
+    </>
+  );
+};
+
+export default Keyboard;
+
+/*
+  <div ref={ref} className="keyboard">
           <button className="key" data-key="Q">
             Q
           </button>
@@ -102,8 +144,5 @@ const Keyboard = () => {
             </svg>
           </button>
       </div>
-    </>
-  );
-};
 
-export default Keyboard;
+*/

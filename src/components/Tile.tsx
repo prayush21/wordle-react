@@ -1,8 +1,5 @@
+import { TileObj } from "../App";
 
-interface TileObj {
-    value: string,
-    state: "" | "active" | "wrong" | "correct" | "wrong-position",
-}
 
 const Tile = (props: {tileData: TileObj}): JSX.Element => {
     const {tileData} = props;
