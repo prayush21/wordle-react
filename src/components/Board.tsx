@@ -5,7 +5,7 @@ import Tile from "./Tile";
 const Board = () => {
     
     const appContext = useContext(AppContext);
-    console.log(appContext?.board)
+    // console.log(appContext?.board)
     // const tiles: TileObj[] = new Array(30).fill(eTile);
     
     // const [tiles, setTiles] = useState<TileObj[]>( new Array(30).fill(eTile));

@@ -3,6 +3,8 @@ import Keyboard from './components/keyboard';
 import './styles/App.css';
 import Board from './components/Board';
 import Alert from './components/Alert';
+import targetWords from './components/targetWords';
+import dictionary from './components/dictionary';
 
 export interface TileObj {
   value: string,
@@ -16,6 +18,7 @@ export interface AppContextInterface {
   setCurrentAttempt: any,
   setAlertList: any,
   alertList: string[],
+  wordOfTheDay: string
 }
 
 export interface CurrentAttemptInterface {
@@ -25,7 +28,21 @@ export interface CurrentAttemptInterface {
 
 export const AppContext = createContext<AppContextInterface | null>(null);
 
+const getTodaysWord = () => {
+  const timeNow = Date.now();
+  const startDate = new Date("1/1/2022");
+  const diffDays = Math.floor((timeNow - startDate.getTime())/1000/60/60/24);
+  const diffHrs = 24 * diffDays;
+  console.log("diffDays", targetWords[diffDays]);
+  console.log("total words", targetWords.length);
+  console.log('diffHrs', diffHrs);
+  return targetWords[diffDays];
+  
+}
+
 function App() {
+
+  const wordOfTheDay = getTodaysWord();
 
   const eTile: TileObj = {
     value: '',
@@ -58,16 +75,16 @@ const wpTile: TileObj = {
     setBoard(mat);
   },[])
 
-console.log("alertList", alertList);
+// console.log("alertList", alertList);
 
 
   return (
     <div className='App'>
       <div style={{color: "red"}}>Header</div>
-      <AppContext.Provider value={{board, currentAttempt, alertList, setCurrentAttempt, setBoard, setAlertList}}>
+      <AppContext.Provider value={{board, currentAttempt, alertList, setCurrentAttempt, setBoard, setAlertList, wordOfTheDay}}>
         <div className="alert-container">
             {alertList.map((value: string, index) => {
-              console.log("index", index);
+              // console.log("index", index);
               
               return <Alert key={value+index} data={value}/>
             })}
