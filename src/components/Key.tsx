@@ -1,5 +1,5 @@
 import { SyntheticEvent, useContext, useEffect, useRef } from "react";
-import { AppContext, CurrentAttemptInterface, TileObj } from "../App";
+import { AppContext, CurrentAttemptInterface, KeyObj, TileObj } from "../App";
 import dictionary from "./dictionary";
 let i = 0;
 
@@ -20,6 +20,8 @@ const Key = (props: { keyValue: string; state: string }) => {
     alertList,
     setAlertList,
     wordOfTheDay,
+    keysState,
+    setKeysState
   } = appContext || {};
 
   const { keyValue, state } = props;
@@ -33,47 +35,7 @@ const Key = (props: { keyValue: string; state: string }) => {
     if (board !== undefined) {
       if (keyValue === "Enter") {
         if (attempt !== undefined && letterPos !== undefined) {
-          if (letterPos !== 5) {
-            // alertList && setAlertList(["Not Enought Letters", ...alertList]);
-            i++;
-            alertList && setAlertList([`Not Enough Letters`, ...alertList]);
-            return;
-          } else {
-            const word = board[attempt].map(({ value }) => value).join("").toLowerCase();
-            if(isWordInDictionary(word) && wordOfTheDay !== undefined){
-              if(word === wordOfTheDay){
-                const newBoard = [...board];
-                let newRow = [...board[attempt]].map((tile: TileObj): TileObj => {
-                  return {...tile, state: "correct"};
-                });
-                newBoard[attempt] = newRow;
-                setBoard(newBoard);
-                alertList && setAlertList([`Thats Right!`, ...alertList]);
-              } else if(attempt === 5){
-                alertList && setAlertList([`Game Over`, ...alertList]);
-              } else {
-                const newBoard = [...board];
-
-                for (let index = 0; index < wordOfTheDay.length; index++) {
-                  if(word[index] === wordOfTheDay[index]){
-                    newBoard[attempt][index].state = "correct";
-                  } else if(wordOfTheDay.includes(word[index])){
-                    newBoard[attempt][index].state = 'wrong-position'
-                  } else {
-                    newBoard[attempt][index].state = "wrong";
-                  }
-                }
-                setBoard(newBoard);
-                setCurrentAttempt({
-                  ...currentAttempt,
-                  attempt: attempt + 1,
-                  letterPos: 0,
-                });
-              }
-            } else {
-              alertList && setAlertList([`Word not in dictionary`, ...alertList]);
-            }
-          }
+          onEnterClick(attempt, letterPos);
         }
       } else if (keyValue === "Delete") {
         if (attempt !== undefined && letterPos !== undefined) {
@@ -93,15 +55,63 @@ const Key = (props: { keyValue: string; state: string }) => {
           setBoard(newBoard);
           setCurrentAttempt({ ...currentAttempt, letterPos: letterPos + 1 });
         }
-        // if(y < 5){
-        //     const newBoard = board || [];
-        //     newBoard[x][y] = {...board[x][y], value: keyValue};
-        //     setBoard(newBoard);
-        //     setCurrentTile([x, y+1]);
-        // }
       }
     }
   };
+
+  const onEnterClick = (attempt: number, letterPos: number) => {
+    if(board !== undefined){
+    if (letterPos !== 5) {
+      i++;
+      alertList && setAlertList([`Not Enough Letters`, ...alertList]);
+      return;
+    } else {
+      const word = board[attempt].map(({ value }) => value).join("").toLowerCase();
+      if(isWordInDictionary(word) && wordOfTheDay !== undefined){
+        if(word === wordOfTheDay){
+          const newBoard = [...board];
+          let newRow = [...board[attempt]].map((tile: TileObj): TileObj => {
+            return {...tile, state: "correct"};
+          });
+          newBoard[attempt] = newRow;
+          setBoard(newBoard);
+          alertList && setAlertList([`Thats Right!`, ...alertList]);
+        } else if(attempt === 5){
+          alertList && setAlertList([`Game Over`, ...alertList]);
+        } else {
+          const newBoard = [...board];
+  
+          for (let index = 0; index < wordOfTheDay.length; index++) {
+            if(word[index] === wordOfTheDay[index]){
+              newBoard[attempt][index].state = "correct";
+            } else if(wordOfTheDay.includes(word[index])){
+              newBoard[attempt][index].state = 'wrong-position'
+            } else {
+              newBoard[attempt][index].state = "wrong";
+            }
+          }
+          if(keysState){
+            const newKeysState = [...keysState];
+            newBoard[attempt].map(({value, state}) => {
+              const index = newKeysState.findIndex(({keyValue, }) => keyValue === value);
+              newKeysState[index].state = state === 'active' ? "" : state;
+            })
+            setKeysState(newKeysState);
+          }
+
+          setBoard(newBoard);
+          setCurrentAttempt({
+            ...currentAttempt,
+            attempt: attempt + 1,
+            letterPos: 0,
+          });
+        }
+      } else {
+        alertList && setAlertList([`Word not in dictionary`, ...alertList]);
+      }
+    }
+  }
+}
 
   return (
     <button

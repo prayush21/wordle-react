@@ -11,6 +11,11 @@ export interface TileObj {
   state: "" | "active" | "wrong" | "correct" | "wrong-position",
 }
 
+export interface KeyObj {
+  keyValue: string,
+  state: "" | "wrong" | "correct" | "wrong-position",
+}
+
 export interface AppContextInterface {
   board: TileObj[][],
   setBoard: any,
@@ -18,7 +23,9 @@ export interface AppContextInterface {
   setCurrentAttempt: any,
   setAlertList: any,
   alertList: string[],
-  wordOfTheDay: string
+  wordOfTheDay: string,
+  keysState: KeyObj[],
+  setKeysState: any,
 }
 
 export interface CurrentAttemptInterface {
@@ -64,6 +71,15 @@ const wpTile: TileObj = {
     value: 'F',
     state: 'wrong-position',
 };
+const keysArray = "Q W E R T Y U I O P A S D F G H J K L Enter Z X C V B N M Delete".split(" ");
+const keysObjArray = keysArray.map((value): KeyObj => {
+  return {
+    keyValue: value,
+    state: "",
+  }
+})
+
+const [keysState, setKeysState] = useState(keysObjArray);
 
   const mat = new Array(6).fill(null).map(x => new Array(5).fill(eTile));
   const [board, setBoard] = useState<TileObj[][]>(mat)
@@ -81,7 +97,7 @@ const wpTile: TileObj = {
   return (
     <div className='App'>
       <div style={{color: "red"}}>Header</div>
-      <AppContext.Provider value={{board, currentAttempt, alertList, setCurrentAttempt, setBoard, setAlertList, wordOfTheDay}}>
+      <AppContext.Provider value={{board, currentAttempt, alertList, keysState, setCurrentAttempt, setBoard, setAlertList, setKeysState, wordOfTheDay}}>
         <div className="alert-container">
             {alertList.map((value: string, index) => {
               // console.log("index", index);
