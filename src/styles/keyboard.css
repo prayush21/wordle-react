@@ -1,16 +1,26 @@
+:root{
+    --keyboard-height: 180px;
+}
+
+.keyboard-container{
+    display: flex;
+    margin: 0 1em
+}
+
 .keyboard{
     display: grid;
     grid-template-columns: repeat(20, minmax(auto,1.5em));
-    grid-auto-rows: 3;
+    /* grid-auto-rows: 3; */
     gap: 0.25em;
     justify-content: center;
+    height: var(--keyboard-height);
 }
 
 .key{
     font-size: inherit;
     grid-column: span 2;
     border: none;
-    height: 4em;
+    height: 3em;
     display: flex;
     align-items: center;
     justify-content: center;

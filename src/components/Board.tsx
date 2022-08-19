@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { AppContext, TileObj } from "../App";
 import Tile from "./Tile";
+import TileRow from "./TileRow";
 
 const Board = () => {
     
@@ -16,9 +17,11 @@ const Board = () => {
 
 
     return <>
-        {appContext?.board.map((tileRow: TileObj[]) => 
-            tileRow.map((tileData: TileObj) => <Tile tileData={tileData}/>)
+    <div className="Board-module">
+        {appContext?.board.map((tileRow: TileObj[]) => <TileRow tileRow={tileRow}/>
+        // tileRow.map((tileData: TileObj) => <Tile tileData={tileData}/>)
         )}
+    </div>
     </>;
 }
 

@@ -5,6 +5,8 @@ import Board from './components/Board';
 import Alert from './components/Alert';
 import targetWords from './components/targetWords';
 import dictionary from './components/dictionary';
+import { FiSettings } from "react-icons/fi";
+import { FaHamburger } from "react-icons/fa";
 
 export interface TileObj {
   value: string,
@@ -96,19 +98,31 @@ const [keysState, setKeysState] = useState(keysObjArray);
 
   return (
     <div className='App'>
-      <div style={{color: "red"}}>Header</div>
+      <header className='App-header-module'>
+        <div className="header-left">
+        <FaHamburger/>
+        </div>
+        <div className='title'>
+            Wordle
+        </div>
+        <div className="header-right">
+        <FiSettings/>
+        </div>
+      </header>
       <AppContext.Provider value={{board, currentAttempt, alertList, keysState, setCurrentAttempt, setBoard, setAlertList, setKeysState, wordOfTheDay}}>
+      <div className="App-game-module">
+      <div className='Board-module-container'>
+        <Board/>
+      </div>
+      <div className="keyboard-container">
+      <Keyboard/>
+      </div>
+      </div>  
         <div className="alert-container">
             {alertList.map((value: string, index) => {
-              // console.log("index", index);
-              
               return <Alert key={value+index} data={value}/>
             })}
         </div>
-      <div className='guess-grid'>
-        <Board/>
-      </div>
-      <Keyboard/>
       </AppContext.Provider>
     </div>
   );

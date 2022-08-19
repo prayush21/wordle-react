@@ -1,3 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Aboreto&family=Silkscreen&display=swap');
+:root{
+  --header-height: 45px;
+  --color-tone-4: #3a3a3c;
+}
+
+.App-header-module{
+  display: flex;
+  flex-direction: row;
+  color: white;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  height: var(--header-height);
+  border-bottom: 1px solid #3a3a3c;
+}
+
+.header-left{
+  display: flex;
+  justify-content: flex-start;
+  flex-grow: 1;
+}
+
+.title{
+  display: flex;
+  justify-content: center;
+  flex-grow: 2;
+  
+  font-size: 32px;
+  /* font-family: "nyt-karnakcondensed"; */
+  font-family: 'Aboreto', cursive;
+  font-weight: 700;
+}
+
+
+.header-right{
+  display: flex;
+  justify-content: flex-end;
+  flex-grow: 1;
+}
+
 .App{
   display: flex;
   flex-direction: column;
@@ -40,20 +81,56 @@
   margin-bottom: 0;
 }
 
-.guess-grid{
-  display: grid;
-
-  /* grid-template-rows: repeat(6, 1fr);
-    grid-gap: 5px; */
-  grid-template-columns: repeat(5, minmax(6em, 7em));
-  /* grid-template-rows: repeat(6, 4em); */
-  justify-content: center;
-  margin: 1em 1em;
-  flex-grow: 1;
+.App-game-module{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
+  height: calc(100% - var(--header-height));
+  margin: 0 auto;
 }
 
-.tile{
+.Board-module-container{
   display: flex;
+  justify-content: center;
+  flex-grow: 1;
+  padding-bottom: 1em;
+}
+
+.Board-module{
+  height: 420px;
+  width: 350px;
+  padding: 1em 0;
+  margin: 1em auto;
+}
+
+.Board-Row{
+  display: flex;
+  flex-direction: row;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 0.3rem;
+  /* line-height: 2rem;
+  font-size: 2rem; */
+  margin-bottom: 0.3rem;
+}
+
+/* .guess-grid{
+  /* display: grid;
+  grid-template-columns: repeat(5, minmax(6em, 7em));
+  grid-template-rows: repeat(6, 4em);
+  justify-content: center;
+  margin: 1em 1em;
+  flex-grow: 1; */
+
+  /* display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-gap: 5px;
+    padding: 10px;
+    box-sizing: border-box; */
+/* } */
+
+.tile{
+  /* display: flex;
   margin: 0.1em;
   border: 0.01em solid hsl(240, 2%, 23%);
   color: white;
@@ -61,7 +138,22 @@
   justify-content: center;
   align-items: center;
   text-transform: uppercase;
+  font-weight: bold; */
+
+  border: 2px solid var(--color-tone-4);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  line-height: 1.5rem;
+  font-size: 1.5rem;
+  aspect-ratio: 1;
   font-weight: bold;
+  vertical-align: middle;
+  color: #ffffff;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  user-select: none;
 }
 
 @keyframes blinker {
