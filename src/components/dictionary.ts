@@ -13,6 +13,7 @@ const dictionary = [
     "abash",
     "abask",
     "abaya",
+    "krupa",
     "abbas",
     "abbed",
     "abbes",

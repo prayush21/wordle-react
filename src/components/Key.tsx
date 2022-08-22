@@ -3,7 +3,7 @@ import { AppContext, CurrentAttemptInterface, KeyObj, TileObj } from "../App";
 import dictionary from "./dictionary";
 let i = 0;
 
-const isWordInDictionary = (Word: string) => {
+export const isWordInDictionary = (Word: string) => {
   console.log("Word",Word);
   return dictionary.find(word => word === Word) === undefined ? false : true;
 }
@@ -21,14 +21,16 @@ const Key = (props: { keyValue: string; state: string }) => {
     setAlertList,
     wordOfTheDay,
     keysState,
-    setKeysState
+    setKeysState,
+    showModal,
+    setShowModal,
   } = appContext || {};
 
   const { keyValue, state } = props;
   const stateForClass =
     keyValue == "Enter" || keyValue == "Delete" ? "large" : state;
 
-  const keyClick = (e: SyntheticEvent, keyValue: string) => {
+  const keyClick = (keyValue: string) => {
     const { attempt, letterPos } = currentAttempt || {};
 
     console.log(keyValue, attempt, letterPos);
@@ -63,7 +65,7 @@ const Key = (props: { keyValue: string; state: string }) => {
     if(board !== undefined){
     if (letterPos !== 5) {
       i++;
-      alertList && setAlertList([`Not Enough Letters`, ...alertList]);
+      alertList && setAlertList([`${i} Not Enough Letters`, ]);
       return;
     } else {
       const word = board[attempt].map(({ value }) => value).join("").toLowerCase();
@@ -75,9 +77,10 @@ const Key = (props: { keyValue: string; state: string }) => {
           });
           newBoard[attempt] = newRow;
           setBoard(newBoard);
-          alertList && setAlertList([`Thats Right!`, ...alertList]);
+          alertList && setAlertList([`Thats Right!`, ]);
+          setShowModal(true);
         } else if(attempt === 5){
-          alertList && setAlertList([`Game Over`, ...alertList]);
+          alertList && setAlertList([`Game Over`, ]);
         } else {
           const newBoard = [...board];
   
@@ -107,7 +110,8 @@ const Key = (props: { keyValue: string; state: string }) => {
           });
         }
       } else {
-        alertList && setAlertList([`Word not in dictionary`, ...alertList]);
+        i++;
+        alertList && setAlertList([`${i} Word not in dictionary`, ]);
       }
     }
   }
@@ -115,7 +119,7 @@ const Key = (props: { keyValue: string; state: string }) => {
 
   return (
     <button
-      onClick={(e) => keyClick(e, keyValue)}
+      onClick={(e) => keyClick(keyValue)}
       className={`key ${stateForClass}`}
     >
       {keyValue !== "Delete" ? (
