@@ -97,11 +97,11 @@
         cursor: pointer;
     }
 
-    .key.large{
+    /* .key.large{ */
         /* grid-column: span 3; */
         /* font-size: 14px; */
         /* line-height: normal; */
-    }
+    /* } */
 
 
 }

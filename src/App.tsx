@@ -3,7 +3,6 @@ import Keyboard from "./components/keyboard";
 import "./styles/App.css";
 import Board from "./components/Board";
 import Alert from "./components/Alert";
-import targetWords from "./components/targetWords";
 import dictionary from "./components/dictionary";
 import menuIcon from "./assets/menu_icon.svg"; // Import the SVG file
 import settingsIcon from "./assets/settings_icon.svg"; // Import the SVG file
