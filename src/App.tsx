@@ -54,7 +54,7 @@ export const AppContext = createContext<AppContextInterface | null>(null);
 // };
 
 function App() {
-  const wordOfTheDay = "onset";
+  const wordOfTheDay = "reset";
 
   const eTile: TileObj = {
     value: "",
@@ -96,136 +96,130 @@ function App() {
     { attempt: 0, letterPos: 0 }
   );
 
-  const keyClick = (keyValue: string) => {
-    const { attempt, letterPos } = currentAttempt || {};
+  const isWordInDictionary = React.useCallback((Word: string) => {
+    return dictionary.find((word) => word === Word) !== undefined;
+  }, []);
 
-    console.log(keyValue, attempt, letterPos);
-    if (board !== undefined) {
-      if (keyValue === "ENTER") {
-        if (attempt !== undefined && letterPos !== undefined) {
-          onEnterClick(attempt, letterPos);
-        }
-      } else if (keyValue === "DELETE") {
-        if (attempt !== undefined && letterPos !== undefined) {
-          if (letterPos <= 0) return;
-          let newBoard = [...board];
-          newBoard[attempt][letterPos - 1] = { value: "", state: "" };
-          setBoard(newBoard);
-          setCurrentAttempt({ ...currentAttempt, letterPos: letterPos - 1 });
-        }
-      } else {
-        if (attempt !== undefined && letterPos !== undefined) {
-          if (letterPos > 4) return;
-          let newBoard = [...board];
-          // console.log("newBoard", board[attempt]);
-          newBoard[attempt][letterPos] = { value: keyValue, state: "" };
-          // console.log("haha", newBoard[attempt][letterPos].value);
-          setBoard(newBoard);
-          setCurrentAttempt({ ...currentAttempt, letterPos: letterPos + 1 });
-        }
-      }
-    }
-  };
+  const onEnterClick = React.useCallback(
+    (attempt: number, letterPos: number) => {
+      if (!board) return;
 
-  const isWordInDictionary = (Word: string) => {
-    return dictionary.find((word) => word === Word) === undefined
-      ? false
-      : true;
-  };
-
-  const onEnterClick = (attempt: number, letterPos: number) => {
-    if (board !== undefined) {
       if (letterPos !== 5) {
-        alertList && setAlertList([`Not Enough Letters`]);
+        alertList && setAlertList(["Not Enough Letters"]);
         return;
-      } else {
-        const word = board[attempt]
-          .map(({ value }) => value)
-          .join("")
-          .toLowerCase();
-        if (isWordInDictionary(word) && wordOfTheDay !== undefined) {
-          if (word === wordOfTheDay) {
-            const newBoard = [...board];
-            let newRow = [...board[attempt]].map((tile: TileObj): TileObj => {
-              return { ...tile, state: "correct" };
-            });
-            newBoard[attempt] = newRow;
+      }
+
+      const word = board[attempt]
+        .map(({ value }) => value)
+        .join("")
+        .toLowerCase();
+      if (!isWordInDictionary(word)) {
+        alertList && setAlertList(["Word not in dictionary"]);
+        return;
+      }
+
+      if (word === wordOfTheDay) {
+        const newBoard = [...board];
+        newBoard[attempt] = newBoard[attempt].map((tile) => ({
+          ...tile,
+          state: "correct",
+        }));
+        setBoard(newBoard);
+        setAlertList(["That's Right!"]);
+        return;
+      }
+
+      if (attempt === 5) {
+        setAlertList(["Game Over"]);
+        return;
+      }
+
+      const newBoard = [...board];
+      const guessArray = newBoard[attempt].map((tile) => ({
+        key: tile.value.toLowerCase(),
+        state: "grey",
+      }));
+      const solutionArray: Array<string | null> = [...wordOfTheDay];
+
+      guessArray.forEach((letter, index) => {
+        if (solutionArray[index] === letter.key) {
+          newBoard[attempt][index].state = "correct";
+          letter.state = "green";
+          solutionArray[index] = null;
+        }
+      });
+
+      guessArray.forEach((letter, index) => {
+        if (solutionArray.includes(letter.key) && letter.state !== "green") {
+          newBoard[attempt][index].state = "wrong-position";
+          solutionArray[solutionArray.indexOf(letter.key)] = null;
+        }
+      });
+
+      if (keysState) {
+        const newKeysState = [...keysState];
+        newBoard[attempt].forEach(({ value, state }) => {
+          const index = newKeysState.findIndex(
+            ({ keyValue }) => keyValue === value
+          );
+          if (index !== -1) {
+            newKeysState[index].state = state === "active" ? "" : state;
+          }
+        });
+        setKeysState(newKeysState);
+      }
+
+      setBoard(newBoard);
+      setCurrentAttempt((prev) => ({
+        ...prev,
+        attempt: attempt + 1,
+        letterPos: 0,
+      }));
+    },
+    [
+      board,
+      setBoard,
+      setAlertList,
+      setKeysState,
+      setCurrentAttempt,
+      wordOfTheDay,
+      isWordInDictionary,
+      keysState,
+      alertList,
+    ]
+  );
+
+  const keyClick = React.useCallback(
+    (keyValue: string) => {
+      const { attempt, letterPos } = currentAttempt || {};
+
+      console.log(keyValue, attempt, letterPos);
+      if (board !== undefined) {
+        if (keyValue === "ENTER") {
+          if (attempt !== undefined && letterPos !== undefined) {
+            onEnterClick(attempt, letterPos);
+          }
+        } else if (keyValue === "DELETE") {
+          if (attempt !== undefined && letterPos !== undefined) {
+            if (letterPos <= 0) return;
+            let newBoard = [...board];
+            newBoard[attempt][letterPos - 1] = { value: "", state: "" };
             setBoard(newBoard);
-            alertList && setAlertList([`Thats Right!`]);
-          } else if (attempt === 5) {
-            alertList && setAlertList([`Game Over`]);
-          } else {
-            const newBoard = [...board];
-            const guessArray = newBoard[attempt].map((element) => {
-              return { key: element.value.toLowerCase(), state: "grey" };
-            });
-            const solutionArray: any[] = [];
-            for (let index = 0; index < wordOfTheDay.length; index++) {
-              solutionArray.push(wordOfTheDay[index]);
-              newBoard[attempt][index].state = "wrong";
-            }
-            console.log("guessAr, solAr", guessArray, solutionArray);
-
-            // for (let index = 0; index < wordOfTheDay.length; index++) {
-            //   if(word[index] === wordOfTheDay[index]){
-            //     newBoard[attempt][index].state = "correct";
-            //     console.log("word[index]", word[index], newBoard[attempt][index].state);
-            //   } else if(wordOfTheDay.includes(word[index])){
-            //     newBoard[attempt][index].state = 'wrong-position'
-            //   } else {
-            //     newBoard[attempt][index].state = "wrong";
-            //   }
-            // }
-
-            guessArray.forEach((letter, index) => {
-              if (solutionArray[index] === letter.key) {
-                console.log("correct", letter.key);
-                newBoard[attempt][index].state = "correct";
-                letter.state = "green";
-                solutionArray[index] = null;
-              }
-            });
-
-            guessArray.forEach((letter, index) => {
-              if (
-                solutionArray.includes(letter.key) &&
-                letter.state !== "green"
-              ) {
-                console.log("yellow", letter.key);
-                newBoard[attempt][index].state = "wrong-position";
-                solutionArray[solutionArray.indexOf(letter.key)] = null;
-              }
-            });
-
-            if (keysState) {
-              const newKeysState = [...keysState];
-              console.log("newKeysState", newKeysState);
-
-              newBoard[attempt].map(({ value, state }) => {
-                const index = newKeysState.findIndex(
-                  ({ keyValue }) => keyValue === value
-                );
-                console.log("inside", value, state, index);
-                // console.log("newKeysState", newKeysState[index].state);
-                newKeysState[index].state = state === "active" ? "" : state;
-                return null;
-              });
-              setKeysState(newKeysState);
-            }
-
-            setBoard(newBoard);
-            setCurrentAttempt({
-              ...currentAttempt,
-              attempt: attempt + 1,
-              letterPos: 0,
-            });
+            setCurrentAttempt({ ...currentAttempt, letterPos: letterPos - 1 });
           }
         } else {
-          alertList && setAlertList([`Word not in dictionary`]);
+          if (attempt !== undefined && letterPos !== undefined) {
+            if (letterPos > 4) return;
+            let newBoard = [...board];
+            newBoard[attempt][letterPos] = { value: keyValue, state: "" };
+            setBoard(newBoard);
+            setCurrentAttempt({ ...currentAttempt, letterPos: letterPos + 1 });
+          }
         }
       }
-    }
-  };
+    },
+    [board, currentAttempt, onEnterClick, setBoard, setCurrentAttempt]
+  );
 
   const keyBoardKeyClick = React.useCallback(
     ({ key }: KeyboardEvent) => {
