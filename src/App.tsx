@@ -41,18 +41,18 @@ export interface CurrentAttemptInterface {
 
 export const AppContext = createContext<AppContextInterface | null>(null);
 
-const getTodaysWord = () => {
-  const timeNow = Date.now();
-  const startDate = new Date("1/1/2022");
-  const diffDays = Math.floor(
-    (timeNow - startDate.getTime()) / 1000 / 60 / 60 / 24
-  );
-  const diffHrs = 24 * diffDays;
-  // console.log("diffDays", targetWords[diffDays]);
-  // console.log("total words", targetWords.length);
-  // console.log("diffHrs", diffHrs);
-  return targetWords[diffDays];
-};
+// const getTodaysWord = () => {
+//   const timeNow = Date.now();
+//   const startDate = new Date("1/1/2022");
+//   const diffDays = Math.floor(
+//     (timeNow - startDate.getTime()) / 1000 / 60 / 60 / 24
+//   );
+//   const diffHrs = 24 * diffDays;
+//   // console.log("diffDays", targetWords[diffDays]);
+//   // console.log("total words", targetWords.length);
+//   // console.log("diffHrs", diffHrs);
+//   return targetWords[diffDays];
+// };
 
 function App() {
   const wordOfTheDay = "onset";
@@ -61,22 +61,22 @@ function App() {
     value: "",
     state: "",
   };
-  const aTile: TileObj = {
-    value: "",
-    state: "active",
-  };
-  const wTile: TileObj = {
-    value: "A",
-    state: "wrong",
-  };
-  const cTile: TileObj = {
-    value: "R",
-    state: "correct",
-  };
-  const wpTile: TileObj = {
-    value: "F",
-    state: "wrong-position",
-  };
+  // const aTile: TileObj = {
+  //   value: "",
+  //   state: "active",
+  // };
+  // const wTile: TileObj = {
+  //   value: "A",
+  //   state: "wrong",
+  // };
+  // const cTile: TileObj = {
+  //   value: "R",
+  //   state: "correct",
+  // };
+  // const wpTile: TileObj = {
+  //   value: "F",
+  //   state: "wrong-position",
+  // };
   const keysArray =
     "Q W E R T Y U I O P A S D F G H J K L ENTER Z X C V B N M DELETE".split(
       " "
@@ -209,6 +209,7 @@ function App() {
                 console.log("inside", value, state, index);
                 // console.log("newKeysState", newKeysState[index].state);
                 newKeysState[index].state = state === "active" ? "" : state;
+                return null;
               });
               setKeysState(newKeysState);
             }
@@ -227,18 +228,21 @@ function App() {
     }
   };
 
-  const keyBoardKeyClick = ({ key }: any) => {
-    console.log("key", key);
-    const keyValue = key === "Backspace" ? "Delete" : key;
-    if (keyValue !== "Enter" && keyValue !== "Delete" && keyValue.length > 1)
-      return;
-    if (keyValue === " ") return;
-    keyClick(keyValue.toUpperCase());
-  };
+  const keyBoardKeyClick = React.useCallback(
+    ({ key }: KeyboardEvent) => {
+      console.log("key", key);
+      const keyValue = key === "Backspace" ? "Delete" : key;
+      if (keyValue !== "Enter" && keyValue !== "Delete" && keyValue.length > 1)
+        return;
+      if (keyValue === " ") return;
+      keyClick(keyValue.toUpperCase());
+    },
+    [keyClick]
+  );
 
   useEffect(() => {
     setBoard(mat);
-  }, []);
+  }, [mat]);
 
   useEffect(() => {
     window.addEventListener("keyup", keyBoardKeyClick);

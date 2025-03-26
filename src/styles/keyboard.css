@@ -91,7 +91,6 @@
         fill: white;
         text-transform: uppercase;
         font-weight: bold;
-        font-size: 16px;
     
         border-radius: .5em;
         user-select: none;
@@ -100,7 +99,7 @@
 
     .key.large{
         /* grid-column: span 3; */
-        font-size: 12px;
+        /* font-size: 14px; */
         /* line-height: normal; */
     }
 
