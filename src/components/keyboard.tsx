@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { AppContext } from "../App";
 import "./../styles/keyboard.css";
 import Key from "./Key";
@@ -12,7 +12,7 @@ const Keyboard = () => {
     <>
       <div ref={ref} className="keyboard">
         {keysState?.map(({ keyValue, state }) => {
-          if (keyValue == "A") {
+          if (keyValue === "A") {
             return (
               <>
                 <div className="space"></div>
