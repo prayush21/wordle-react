@@ -1,26 +1,13 @@
-import { SyntheticEvent, useContext, useEffect, useRef } from "react";
-import { AppContext, CurrentAttemptInterface, KeyObj, TileObj } from "../App";
-import dictionary from "./dictionary";
-let i = 0;
+import { useContext } from "react";
+import { AppContext } from "../App";
 
 const Key = (props: { keyValue: string; state: string }) => {
   const appContext = useContext(AppContext);
-  const {
-    board,
-    setBoard,
-    currentAttempt,
-    setCurrentAttempt,
-    alertList,
-    setAlertList,
-    wordOfTheDay,
-    keysState,
-    setKeysState,
-    keyClick,
-  } = appContext || {};
+  const { keyClick } = appContext || {};
 
   const { keyValue, state } = props;
   const stateForClass =
-    keyValue == "ENTER" || keyValue == "DELETE" ? "large" : state;
+    keyValue === "ENTER" || keyValue === "DELETE" ? "large" : state;
 
   return (
     <button
