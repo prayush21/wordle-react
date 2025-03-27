@@ -12,7 +12,7 @@
   justify-content: flex-start;
   align-items: center;
   height: var(--header-height);
-  border-bottom: 1px solid #3a3a3c;
+  /* border-bottom: 1px solid #3a3a3c; */
 }
 
 .header-left{
@@ -188,6 +188,10 @@
 }
 
 @media (max-width: 600px){
+  .App-header-module{
+    height: 3em;
+  }
+
   .Board-module-container{
     padding-bottom: 0 0 1em 0;
   }
