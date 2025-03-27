@@ -189,6 +189,6 @@
 
 @media (max-width: 600px){
   .Board-module-container{
-    padding-bottom: 0;
+    padding-bottom: 0 0 1em 0;
   }
 } 
