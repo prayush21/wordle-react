@@ -187,3 +187,8 @@
   }
 }
 
+@media (max-width: 600px){
+  .Board-module-container{
+    padding-bottom: 0;
+  }
+} 

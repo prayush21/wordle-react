@@ -4,11 +4,9 @@ import "./styles/App.css";
 import Board from "./components/Board";
 import Alert from "./components/Alert";
 import dictionary from "./components/dictionary";
-import menuIcon from "./assets/menu_icon.svg"; // Import the SVG file
-import settingsIcon from "./assets/settings_icon.svg"; // Import the SVG file
-import helpIcon from "./assets/help.svg"; // Import the SVG file
-// import lightbulbIcon from "./assets/lightbulb_2.svg"; // Import the SVG file
-// import statsIcon from "./assets/equalizer.svg"; // Import the SVG file
+import menuIcon from "./assets/menu_icon.svg";
+import settingsIcon from "./assets/settings_icon.svg";
+import helpIcon from "./assets/help.svg";
 
 export interface TileObj {
   value: string;
@@ -22,15 +20,18 @@ export interface KeyObj {
 
 export interface AppContextInterface {
   board: TileObj[][];
-  setBoard: any;
-  currentAttempt: CurrentAttemptInterface | null;
-  setCurrentAttempt: any;
-  setAlertList: any;
+  setBoard: React.Dispatch<React.SetStateAction<TileObj[][]>>;
+  currentAttempt: CurrentAttemptInterface;
+  setCurrentAttempt: React.Dispatch<
+    React.SetStateAction<CurrentAttemptInterface>
+  >;
+  setAlertList: React.Dispatch<React.SetStateAction<string[]>>;
   alertList: string[];
   wordOfTheDay: string;
   keysState: KeyObj[];
-  setKeysState: any;
-  keyClick: any;
+  setKeysState: React.Dispatch<React.SetStateAction<KeyObj[]>>;
+  keyClick: (keyValue: string) => void;
+  gameStatus: "playing" | "won" | "lost";
 }
 
 export interface CurrentAttemptInterface {
@@ -40,42 +41,29 @@ export interface CurrentAttemptInterface {
 
 export const AppContext = createContext<AppContextInterface | null>(null);
 
-// const getTodaysWord = () => {
-//   const timeNow = Date.now();
-//   const startDate = new Date("1/1/2022");
-//   const diffDays = Math.floor(
-//     (timeNow - startDate.getTime()) / 1000 / 60 / 60 / 24
-//   );
-//   const diffHrs = 24 * diffDays;
-//   // console.log("diffDays", targetWords[diffDays]);
-//   // console.log("total words", targetWords.length);
-//   // console.log("diffHrs", diffHrs);
-//   return targetWords[diffDays];
-// };
-
 function App() {
-  const wordOfTheDay = "reset";
+  // List of possible words for the game
+  // const targetWords = [
+  //   "reset",
+  //   "world",
+  //   "apple",
+  //   "light",
+  //   "house",
+  //   "mouse",
+  //   "ocean",
+  //   "cloud",
+  //   "brain",
+  //   "smile",
+  // ];
+
+  // Randomly select a word of the day
+  const wordOfTheDay = "house";
 
   const eTile: TileObj = {
     value: "",
     state: "",
   };
-  // const aTile: TileObj = {
-  //   value: "",
-  //   state: "active",
-  // };
-  // const wTile: TileObj = {
-  //   value: "A",
-  //   state: "wrong",
-  // };
-  // const cTile: TileObj = {
-  //   value: "R",
-  //   state: "correct",
-  // };
-  // const wpTile: TileObj = {
-  //   value: "F",
-  //   state: "wrong-position",
-  // };
+
   const keysArray =
     "Q W E R T Y U I O P A S D F G H J K L ENTER Z X C V B N M DELETE".split(
       " "
@@ -88,90 +76,115 @@ function App() {
   });
 
   const [keysState, setKeysState] = useState(keysObjArray);
+  const [gameStatus, setGameStatus] = useState<"playing" | "won" | "lost">(
+    "playing"
+  );
 
-  const mat = new Array(6).fill(null).map((x) => new Array(5).fill(eTile));
+  const mat = new Array(6).fill(null).map(() => new Array(5).fill(eTile));
   const [board, setBoard] = useState<TileObj[][]>(mat);
   const [alertList, setAlertList] = useState<string[]>([]);
   const [currentAttempt, setCurrentAttempt] = useState<CurrentAttemptInterface>(
     { attempt: 0, letterPos: 0 }
   );
 
-  const isWordInDictionary = React.useCallback((Word: string) => {
-    return dictionary.find((word) => word === Word) !== undefined;
+  const isWordInDictionary = React.useCallback((word: string) => {
+    return (
+      dictionary.find((dictWord) => dictWord === word.toLowerCase()) !==
+      undefined
+    );
   }, []);
+
+  const updateKeyboardState = React.useCallback(
+    (attempt: number) => {
+      const newKeysState = [...keysState];
+      board[attempt].forEach(({ value, state }) => {
+        const keyIndex = newKeysState.findIndex(
+          ({ keyValue }) => keyValue.toLowerCase() === value.toLowerCase()
+        );
+        if (keyIndex !== -1) {
+          // Only update the key state if the new state is more specific
+          const currentKeyState = newKeysState[keyIndex].state;
+          if (
+            (state === "correct" && currentKeyState !== "correct") ||
+            (state === "wrong-position" &&
+              currentKeyState !== "correct" &&
+              currentKeyState !== "wrong-position") ||
+            (state === "wrong" && currentKeyState === "")
+          ) {
+            newKeysState[keyIndex].state = state;
+          }
+        }
+      });
+      setKeysState(newKeysState);
+    },
+    [keysState, board]
+  );
 
   const onEnterClick = React.useCallback(
     (attempt: number, letterPos: number) => {
-      if (!board) return;
-
+      // Check if the word is complete
       if (letterPos !== 5) {
-        alertList && setAlertList(["Not Enough Letters"]);
+        setAlertList(["Not Enough Letters"]);
         return;
       }
 
+      // Get the current guess
       const word = board[attempt]
         .map(({ value }) => value)
         .join("")
         .toLowerCase();
+
+      // Validate the word
       if (!isWordInDictionary(word)) {
-        alertList && setAlertList(["Word not in dictionary"]);
+        setAlertList(["Word not in dictionary"]);
         return;
       }
 
-      if (word === wordOfTheDay) {
-        const newBoard = [...board];
-        newBoard[attempt] = newBoard[attempt].map((tile) => ({
-          ...tile,
-          state: "correct",
-        }));
-        setBoard(newBoard);
-        setAlertList(["That's Right!"]);
-        return;
-      }
-
-      if (attempt === 5) {
-        setAlertList(["Game Over"]);
-        return;
-      }
-
+      // Create a copy of the solution word to track letter usage
+      const solutionArray: Array<string | null> = wordOfTheDay.split("");
       const newBoard = [...board];
-      const guessArray = newBoard[attempt].map((tile) => ({
-        key: tile.value.toLowerCase(),
-        state: "grey",
-      }));
-      const solutionArray: Array<string | null> = [...wordOfTheDay];
 
-      guessArray.forEach((letter, index) => {
-        if (solutionArray[index] === letter.key) {
+      // First pass: mark correct letters (green)
+      board[attempt].forEach((tile, index) => {
+        if (tile.value.toLowerCase() === solutionArray[index]) {
           newBoard[attempt][index].state = "correct";
-          letter.state = "green";
-          solutionArray[index] = null;
+          solutionArray[index] = null; // Mark as used
         }
       });
 
-      guessArray.forEach((letter, index) => {
-        if (solutionArray.includes(letter.key) && letter.state !== "green") {
-          newBoard[attempt][index].state = "wrong-position";
-          solutionArray[solutionArray.indexOf(letter.key)] = null;
-        }
-      });
-
-      if (keysState) {
-        const newKeysState = [...keysState];
-        newBoard[attempt].forEach(({ value, state }) => {
-          const index = newKeysState.findIndex(
-            ({ keyValue }) => keyValue === value
-          );
-          if (index !== -1) {
-            newKeysState[index].state = state === "active" ? "" : state;
+      // Second pass: mark wrong position letters (yellow)
+      board[attempt].forEach((tile, index) => {
+        if (newBoard[attempt][index].state === "") {
+          const letterIndex = solutionArray.indexOf(tile.value.toLowerCase());
+          if (letterIndex !== -1) {
+            newBoard[attempt][index].state = "wrong-position";
+            solutionArray[letterIndex] = null; // Mark as used
+          } else {
+            newBoard[attempt][index].state = "wrong";
           }
-        });
-        setKeysState(newKeysState);
+        }
+      });
+
+      // Update board and keyboard state
+      setBoard(newBoard);
+      updateKeyboardState(attempt);
+
+      // Check win/lose conditions
+      if (word === wordOfTheDay) {
+        setGameStatus("won");
+        setAlertList(["Congratulations! You won!"]);
+        return;
       }
 
-      setBoard(newBoard);
+      // Move to next attempt or end game
+      if (attempt === 5) {
+        setGameStatus("lost");
+        setAlertList([`Game Over! The word was ${wordOfTheDay.toUpperCase()}`]);
+        return;
+      }
+
+      // Move to next attempt
       setCurrentAttempt((prev) => ({
-        ...prev,
         attempt: attempt + 1,
         letterPos: 0,
       }));
@@ -180,66 +193,64 @@ function App() {
       board,
       setBoard,
       setAlertList,
-      setKeysState,
+      updateKeyboardState,
       setCurrentAttempt,
       wordOfTheDay,
       isWordInDictionary,
-      keysState,
-      alertList,
     ]
   );
 
   const keyClick = React.useCallback(
     (keyValue: string) => {
-      const { attempt, letterPos } = currentAttempt || {};
+      // Do nothing if game is over
+      if (gameStatus !== "playing") return;
 
-      console.log(keyValue, attempt, letterPos);
-      if (board !== undefined) {
-        if (keyValue === "ENTER") {
-          if (attempt !== undefined && letterPos !== undefined) {
-            onEnterClick(attempt, letterPos);
-          }
-        } else if (keyValue === "DELETE") {
-          if (attempt !== undefined && letterPos !== undefined) {
-            if (letterPos <= 0) return;
-            let newBoard = [...board];
-            newBoard[attempt][letterPos - 1] = { value: "", state: "" };
-            setBoard(newBoard);
-            setCurrentAttempt({ ...currentAttempt, letterPos: letterPos - 1 });
-          }
-        } else {
-          if (attempt !== undefined && letterPos !== undefined) {
-            if (letterPos > 4) return;
-            let newBoard = [...board];
-            newBoard[attempt][letterPos] = { value: keyValue, state: "" };
-            setBoard(newBoard);
-            setCurrentAttempt({ ...currentAttempt, letterPos: letterPos + 1 });
-          }
+      const { attempt, letterPos } = currentAttempt;
+
+      if (keyValue === "ENTER") {
+        onEnterClick(attempt, letterPos);
+      } else if (keyValue === "DELETE") {
+        if (letterPos > 0) {
+          let newBoard = [...board];
+          newBoard[attempt][letterPos - 1] = { value: "", state: "" };
+          setBoard(newBoard);
+          setCurrentAttempt({ ...currentAttempt, letterPos: letterPos - 1 });
+        }
+      } else {
+        if (letterPos < 5) {
+          let newBoard = [...board];
+          newBoard[attempt][letterPos] = { value: keyValue, state: "" };
+          setBoard(newBoard);
+          setCurrentAttempt({ ...currentAttempt, letterPos: letterPos + 1 });
         }
       }
     },
-    [board, currentAttempt, onEnterClick, setBoard, setCurrentAttempt]
+    [
+      board,
+      currentAttempt,
+      onEnterClick,
+      setBoard,
+      setCurrentAttempt,
+      gameStatus,
+    ]
   );
 
   const keyBoardKeyClick = React.useCallback(
     ({ key }: KeyboardEvent) => {
-      console.log("key", key);
-      const keyValue = key === "Backspace" ? "Delete" : key;
-      if (keyValue !== "Enter" && keyValue !== "Delete" && keyValue.length > 1)
+      const keyValue =
+        key === "Backspace" ? "DELETE" : key === "Enter" ? "ENTER" : key;
+
+      if (keyValue.length > 1 && !["DELETE", "ENTER"].includes(keyValue))
         return;
       if (keyValue === " ") return;
+
       keyClick(keyValue.toUpperCase());
     },
     [keyClick]
   );
 
   useEffect(() => {
-    setBoard(mat);
-  }, [mat]);
-
-  useEffect(() => {
     window.addEventListener("keyup", keyBoardKeyClick);
-
     return () => window.removeEventListener("keyup", keyBoardKeyClick);
   }, [keyBoardKeyClick]);
 
@@ -251,10 +262,8 @@ function App() {
         </div>
         <div className="title">Wordle</div>
         <div className="header-right">
-          <img src={settingsIcon} alt="Menu Icon" className="menu-icon" />
-          {/* <img src={lightbulbIcon} alt="Menu Icon" className="menu-icon" />
-          <img src={statsIcon} alt="Menu Icon" className="menu-icon" /> */}
-          <img src={helpIcon} alt="Menu Icon" className="menu-icon" />
+          <img src={settingsIcon} alt="Settings Icon" className="menu-icon" />
+          <img src={helpIcon} alt="Help Icon" className="menu-icon" />
         </div>
       </header>
       <AppContext.Provider
@@ -269,6 +278,7 @@ function App() {
           setKeysState,
           wordOfTheDay,
           keyClick,
+          gameStatus,
         }}
       >
         <div className="App-game-module">

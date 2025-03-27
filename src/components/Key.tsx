@@ -11,7 +11,7 @@ const Key = (props: { keyValue: string; state: string }) => {
 
   return (
     <button
-      onClick={() => keyClick(keyValue)}
+      onClick={() => keyClick?.(keyValue)}
       className={`key ${stateForClass}`}
     >
       {keyValue !== "DELETE" ? (
