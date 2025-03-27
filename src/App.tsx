@@ -57,7 +57,7 @@ function App() {
   // ];
 
   // Randomly select a word of the day
-  const wordOfTheDay = "house";
+  const wordOfTheDay = "mummy";
 
   const eTile: TileObj = {
     value: "",
